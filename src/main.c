@@ -4,10 +4,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "main.h"
-#include "colors.h"
-
-static bool wm_detected = false;
+#include "wm.h"
+#include "ansi_colors.h"
+#include "config.h"
+#include "error.h"
+#include "event.h"
+#include "log.h"
 
 
 
@@ -23,7 +25,6 @@ int main() {
 
     return 0;
 }
-
 
 
 // * wm functions
@@ -58,11 +59,11 @@ void run_wm(WindowManager* wm) {
             case CreateNotify:
                 on_create_notify(e.xcreatewindow);
                 break;
-            case DestroyNotify:
-                on_destroy_notify(e.xdestroywindow);
+            case ConfigureRequest:
+                on_configure_request(wm, e.xconfigurerequest);
                 break;
-            case ReparentNotify:
-                on_reparent_notify(e.xreparent);
+            case MapRequest:
+                on_map_request(wm, e.xmaprequest);
                 break;
             
             default:
@@ -89,26 +90,43 @@ WindowManager* create_wm() {
     return wm;
 }
 
+void frame(WindowManager* wm, Window w) {
+    XWindowAttributes x_window_attrs;
+    if (XGetWindowAttributes(wm->display, w, &x_window_attrs) != 0)
+        return;
+    
+    // todo framing existing top-level windows
+
+    const Window frame = XCreateSimpleWindow(
+        wm->display,
+        wm->root,
+        x_window_attrs.x,
+        x_window_attrs.y,
+        x_window_attrs.width,
+        x_window_attrs.height,
+        BORDER_WIDTH_PX,
+        BORDER_COLOR,
+        BG_COLOR
+    );
+
+    XSelectInput(
+        wm->display,
+        frame,
+        SubstructureRedirectMask | SubstructureNotifyMask
+    );
+
+    XAddToSaveSet(wm->display, w);
+    XReparentWindow(
+        wm->display,
+        w,
+        frame,
+        0, 0    // offset of client window within frame
+    );
+    XMapWindow(wm->display, frame);
+    //wm->clients[w] = frame;
+}
+
 
 void close_wm(WindowManager* wm) {
     XCloseDisplay(wm->display);
-}
-
-
-
-
-
-
-// ! error handlers
-
-int on_wm_detected(Display* display, XErrorEvent* e) {
-    if ((int)e->error_code != BadAccess)
-        return 0;
-    wm_detected = true;
-    return 0;
-}
-
-int on_x_error(Display* display, XErrorEvent* e) {
-    errorlog("x error: %d\n", e->error_code);
-    return 0;
 }
