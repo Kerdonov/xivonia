@@ -48,7 +48,7 @@ void map_set(ClientMap* this, Window w, Window f) {
         p_entry = p_entry->next;
     }
     if (this->count >= this->cap) {
-        errorlog("client limit of %u exceeded\n", this->cap);
+        errorlog("client limit of %u exceeded", this->cap);
         return;
     }
     // ClientMap doesn't have this value, add new
@@ -83,6 +83,6 @@ void map_remove(ClientMap* this, Window w) {
         }
         p_entry = p_entry->next;
     }
-    errorlog("no such window %lu to remove from ClientMap\n", w);
+    errorlog("no such window %lu to remove from ClientMap", w);
 }
 

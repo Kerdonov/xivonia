@@ -18,7 +18,7 @@ int main() {
     WindowManager* wm = create_wm();
 
     if (!wm) {
-        errorlog("failed to initialize window manager\n");
+        errorlog("failed to initialize window manager");
         return 1;
     }
 
@@ -41,7 +41,7 @@ void run_wm(WindowManager* wm) {
         SubstructureRedirectMask | SubstructureNotifyMask);
     XSync(wm->display, false);
     if (wm_detected) {
-        errorlog("detected another window manager on display\n");
+        errorlog("detected another window manager on display");
         return;
     }
 
@@ -78,7 +78,7 @@ void run_wm(WindowManager* wm) {
         // get event
         XEvent e;
         XNextEvent(wm->display, &e);
-        simplelog("received event: %d\n", e.type);
+        simplelog("received event: %d", e.type);
 
         // dispatch event
         switch (e.type) {
@@ -123,7 +123,7 @@ WindowManager* create_wm() {
     Display* display = XOpenDisplay(NULL);
     char* name = WM_NAME;
     if (display == NULL) {
-        errorlog("failed to open x display\n");
+        errorlog("failed to open x display");
         return NULL;
     }
 
@@ -180,7 +180,7 @@ void frame(WindowManager* wm, Window w, bool created_before_wm) {
 
     // todo XGrabButton() and XGrabKey stuff
 
-    simplelog("framed window %s [%s]\n", (char*)w, (char*)frame);
+    simplelog("framed window %s [%s]", (char*)w, (char*)frame);
 }
 
 

@@ -14,6 +14,6 @@ int on_wm_detected(Display* display, XErrorEvent* e) {
 }
 
 int on_x_error(Display* display, XErrorEvent* e) {
-    errorlog("x error: %d\n", e->error_code);
+    errorlog("x error: %d", e->error_code);
     return 0;
 }
