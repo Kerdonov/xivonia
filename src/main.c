@@ -31,7 +31,7 @@ int main() {
 // * wm functions
 
 void run_wm(WindowManager* wm) {
-    simplelog("running wm: %s\n", wm->name);
+    simplelog("running wm: %s", wm->name);
 
     // initialization
     XSetErrorHandler(on_wm_detected);
@@ -78,7 +78,7 @@ void run_wm(WindowManager* wm) {
         // get event
         XEvent e;
         XNextEvent(wm->display, &e);
-        simplelog("received event: %d", e.type);
+        // simplelog("received event: %d", e.type);
 
         // dispatch event
         switch (e.type) {
@@ -132,7 +132,8 @@ WindowManager* create_wm() {
     wm->display = display;
     wm->name = name;
     wm->root = DefaultRootWindow(wm->display);
-    map_init(wm->clients);
+    wm->clients = map_init(wm->clients);
+    simplelog("clientmap at %p, head at %p", wm->clients, wm->clients->head);
     return wm;
 }
 
@@ -140,8 +141,10 @@ WindowManager* create_wm() {
 
 void frame(WindowManager* wm, Window w, bool created_before_wm) {
     XWindowAttributes x_window_attrs;
-    if (XGetWindowAttributes(wm->display, w, &x_window_attrs) != 0)
+    if (!XGetWindowAttributes(wm->display, w, &x_window_attrs)) {
+        errorlog("frame: failed to get window %lu attributes", w);
         return;
+    }
     
     if (created_before_wm) {
         if (x_window_attrs.override_redirect ||
@@ -180,14 +183,13 @@ void frame(WindowManager* wm, Window w, bool created_before_wm) {
 
     // todo XGrabButton() and XGrabKey stuff
 
-    simplelog("framed window %s [%s]", (char*)w, (char*)frame);
+    simplelog("frame: framed window %lu [%lu]", w, frame);
 }
 
 
 
 void unframe(WindowManager* wm, Window w) {
     Window frame = map_get(wm->clients, w);
-    map_remove(wm->clients, w);     // ? i think this should be here
     XUnmapWindow(wm->display, frame);
 
     // reparent window to root window
@@ -200,6 +202,7 @@ void unframe(WindowManager* wm, Window w) {
     XRemoveFromSaveSet(wm->display, w);
     XDestroyWindow(wm->display, frame);
     // ? and not here
+    map_remove(wm->clients, w);     // ? i think this should be here
 
     simplelog("unframed window %lu [%lu]", w, frame);
 }

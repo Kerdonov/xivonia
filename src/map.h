@@ -22,7 +22,7 @@ typedef struct client_map{
 
 
 // initializes the ClientMap
-void map_init(ClientMap* this);
+ClientMap* map_init(ClientMap* this);
 // checks if entry with key w exists in ClientMap
 bool map_contains(ClientMap* this, Window w);
 // returns the corresponding frame

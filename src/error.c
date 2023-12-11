@@ -17,3 +17,8 @@ int on_x_error(Display* display, XErrorEvent* e) {
     errorlog("x error: %d", e->error_code);
     return 0;
 }
+
+int on_malloc_failed() {
+    errorlog("malloc failed");
+    return 0;
+}
