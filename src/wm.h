@@ -11,7 +11,7 @@ typedef struct window_manager {
     Display* display;
     // todo if needed make const with stupid memcpy hacks
     Window root;
-    ClientMap* clients;
+    ClientEntry* head;
 } WindowManager;
 
 

@@ -99,7 +99,7 @@ void run_wm(WindowManager* wm) {
                 on_unmap_notify(wm, e.xunmap);
                 break;
             case DestroyNotify:
-                on_destroy_notify(e.xdestroywindow);
+                on_destroy_notify(wm, e.xdestroywindow);
                 break;
             
             // * requests
@@ -132,8 +132,8 @@ WindowManager* create_wm() {
     wm->display = display;
     wm->name = name;
     wm->root = DefaultRootWindow(wm->display);
-    wm->clients = map_init(wm->clients);
-    simplelog("clientmap at %p, head at %p", wm->clients, wm->clients->head);
+    wm->head = NULL;
+    simplelog("wm at %p, head at %p", wm, wm->head);
     return wm;
 }
 
@@ -179,9 +179,13 @@ void frame(WindowManager* wm, Window w, bool created_before_wm) {
         0, 0    // offset of client window within frame
     );
     XMapWindow(wm->display, frame);
-    map_set(wm->clients, w, frame);
+    map_set(wm->head, w, frame);
 
     // todo XGrabButton() and XGrabKey stuff
+    // keycode 46 = 'l'
+    // keycode 64 = ALT
+    // ? what the fuck
+    //XGrabButton(wm->display, 46, 64, w, false, GrabModeSync, GrabModeSync);
 
     simplelog("frame: framed window %lu [%lu]", w, frame);
 }
@@ -189,7 +193,7 @@ void frame(WindowManager* wm, Window w, bool created_before_wm) {
 
 
 void unframe(WindowManager* wm, Window w) {
-    Window frame = map_get(wm->clients, w);
+    Window frame = map_get(wm->head, w);
     XUnmapWindow(wm->display, frame);
 
     // reparent window to root window
@@ -202,7 +206,7 @@ void unframe(WindowManager* wm, Window w) {
     XRemoveFromSaveSet(wm->display, w);
     XDestroyWindow(wm->display, frame);
     // ? and not here
-    map_remove(wm->clients, w);     // ? i think this should be here
+    map_remove(wm->head, w);     // ? i think this should be here
 
     simplelog("unframed window %lu [%lu]", w, frame);
 }

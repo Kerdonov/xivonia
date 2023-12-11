@@ -6,28 +6,19 @@
 
 
 
-
-struct client_entry {
+typedef struct client_entry {
     Window window;
     Window frame;
     struct client_entry* next;
-};
-
-typedef struct client_map{
-    unsigned int count;
-    unsigned int cap;
-    struct client_entry** head;
-} ClientMap;
+} ClientEntry;
 
 
 
-// initializes the ClientMap
-ClientMap* map_init(ClientMap* this);
 // checks if entry with key w exists in ClientMap
-bool map_contains(ClientMap* this, Window w);
+bool map_contains(ClientEntry* head, Window w);
 // returns the corresponding frame
-Window map_get(ClientMap* this, Window w);
+Window map_get(ClientEntry* head, Window w);
 // adds or updates the ClientMap
-void map_set(ClientMap* this, Window w, Window f);
+void map_set(ClientEntry* head, Window w, Window f);
 // removes the value with this key from the ClientMap
-void map_remove(ClientMap* this, Window w);
+void map_remove(ClientEntry* head, Window w);

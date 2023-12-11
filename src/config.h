@@ -4,5 +4,4 @@
 #define BG_COLOR            0x4C566A
 #define BORDER_COLOR        0x2E3440
 
-#define CLIENT_LIMIT        10
 #define WM_NAME             "xivonia"
