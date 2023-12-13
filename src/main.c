@@ -1,4 +1,5 @@
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -112,7 +113,7 @@ void run_wm(WindowManager* wm) {
             
             
             default:
-                warninglog("ignored event");
+                warninglog("ignored event %d", e.type);
         }
     }
 }
@@ -181,11 +182,47 @@ void frame(WindowManager* wm, Window w, bool created_before_wm) {
     XMapWindow(wm->display, frame);
     map_set(wm->head, w, frame);
 
-    // todo XGrabButton() and XGrabKey stuff
-    // keycode 46 = 'l'
-    // keycode 64 = ALT
-    // ? what the fuck
-    //XGrabButton(wm->display, 46, 64, w, false, GrabModeSync, GrabModeSync);
+    XGrabButton(
+      wm->display,
+      Button1,
+      Mod1Mask,
+      w,
+      false,
+      ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
+      GrabModeAsync,
+      GrabModeAsync,
+      None,
+      None);
+    //   b. Resize windows with alt + right button.
+    XGrabButton(
+        wm->display,
+        Button3,
+        Mod1Mask,
+        w,
+        false,
+        ButtonPressMask | ButtonReleaseMask | ButtonMotionMask,
+        GrabModeAsync,
+        GrabModeAsync,
+        None,
+        None);
+    //   c. Kill windows with alt + f4.
+    XGrabKey(
+        wm->display,
+        XKeysymToKeycode(wm->display, XK_F4),
+        Mod1Mask,
+        w,
+        false,
+        GrabModeAsync,
+        GrabModeAsync);
+    //   d. Switch windows with alt + tab.
+    XGrabKey(
+        wm->display,
+        XKeysymToKeycode(wm->display, XK_Tab),
+        Mod1Mask,
+        w,
+        false,
+        GrabModeAsync,
+        GrabModeAsync);
 
     simplelog("frame: framed window %lu [%lu]", w, frame);
 }
